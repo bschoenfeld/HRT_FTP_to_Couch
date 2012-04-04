@@ -24,7 +24,7 @@ namespace FTP_To_Couch
                 var json = serializer.Serialize (checkin);
                 var guid = Guid.NewGuid ();
                 
-                var docUrl = "http://127.0.0.1:5984/hrt/" + guid;
+                var docUrl = "http://oilytheotter.iriscouch.com/hrt/" + guid;
                 var request = WebRequest.Create (docUrl);
                 request.Method = "PUT";
                 request.ContentType = "application/json";
@@ -34,7 +34,7 @@ namespace FTP_To_Couch
                 dataStream.Write (json);
                 dataStream.Close ();
                 
-                request.GetResponse ().Close ();
+                request.GetResponse().Close ();
             }
         }
         
@@ -64,7 +64,7 @@ namespace FTP_To_Couch
         {
             List<BusCheckin> busCheckins = new List<BusCheckin> ();
 
-            if (!String.IsNullOrEmpty (file))
+            if(!String.IsNullOrEmpty(file))
             {
                 foreach (string line in file.Split('\n', '\r'))
                 {
