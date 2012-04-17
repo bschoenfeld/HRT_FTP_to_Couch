@@ -24,19 +24,14 @@ namespace FTP_To_Couch
                 //stopwatch.Start();
 
                 var couchUrl = ConfigurationManager.AppSettings.Get("CLOUDANT_URL");
-                var db = new CouchDb("http://oilytheotter.iriscouch.com/");
+                var db = new CouchDb(couchUrl);
                 //var db = new CouchDb("http://127.0.0.1:5984/");
 
                 if(!db.DatabaseExists(CouchDb.HRT_DB_NAME))
                     db.CreateDatabase(CouchDb.HRT_DB_NAME);
 
-                if(couchUrl == null)
-                    db.CreateDocument(CouchDb.HRT_DB_NAME, new test {test1="null url"});
-                else
-                    db.CreateDocument(CouchDb.HRT_DB_NAME, new test {test1=couchUrl});
+                db.DoPullReplication("http://oilytheotter.iriscouch.com/");
 
-                //db.DoPullReplication("http://oilytheotter.iriscouch.com/");
-                /*
                 string contents = GetFileFromServer (new Uri ("ftp://216.54.15.3/Anrd/hrtrtf.txt"));
                 List<BusCheckin> checkins = GetBusCheckinsFromFile (contents);
     
@@ -57,12 +52,12 @@ namespace FTP_To_Couch
                     }
                 }
 
-                //db.DoPushReplication("http://oilytheotter.iriscouch.com/");
+                db.DoPushReplication("http://oilytheotter.iriscouch.com/");
     
                 //stopwatch.Stop();
     
                 //Console.WriteLine(String.Format("Processed {0} checkins. {1} added. {2} have routes. {3} ms", processed, added, routes, stopwatch.ElapsedMilliseconds));
-                 */
+
                 System.Threading.Thread.Sleep(30000);
             }
         }
