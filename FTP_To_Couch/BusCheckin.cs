@@ -2,7 +2,7 @@ using System;
 
 namespace FTP_To_Couch
 {
-    class BusDateTime
+    public class BusDateTime
     {
         public int Year { get; set; }
         public int Mon { get; set; }
@@ -12,13 +12,13 @@ namespace FTP_To_Couch
         public int Sec { get; set; }
     }
 	
-    class Location
+    public class Location
     {
         public string Lat { get; set; }
         public string Lon { get; set; }
     }
 	
-    class BusCheckin
+    public class BusCheckin
     {
         public BusDateTime CheckinTime { get; set; }
         public int BusId { get; set; }
