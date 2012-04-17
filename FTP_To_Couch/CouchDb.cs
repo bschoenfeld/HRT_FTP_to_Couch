@@ -12,10 +12,27 @@ namespace FTP_To_Couch
 
         private static JavaScriptSerializer _serializer = new JavaScriptSerializer();
         private string _dbUrl;
+        private string _username;
+        private string _password;
 
         public CouchDb(string dbUrl)
         {
-            _dbUrl = dbUrl;
+            if(dbUrl.Contains("@"))
+            {
+                int usernameStartIndex = dbUrl.IndexOf("://") + 3;
+                int passwordEndIndex = dbUrl.IndexOf("@");
+                string usernamePassword = dbUrl.Substring(usernameStartIndex, passwordEndIndex - usernameStartIndex);
+                _username = usernamePassword.Substring(0, usernamePassword.IndexOf(':'));
+                _password = usernamePassword.Substring(usernamePassword.IndexOf(':') + 1);
+                _dbUrl = dbUrl.Substring(0, usernameStartIndex) + dbUrl.Substring(passwordEndIndex + 1);
+            }
+            else
+            {
+                _dbUrl = dbUrl;
+                _username = null;
+                _password = null;
+            }
+
             if(!_dbUrl.EndsWith("/"))
                 _dbUrl += "/";
         }
@@ -82,11 +99,13 @@ namespace FTP_To_Couch
             var response = Request(_dbUrl + "_replicate", "POST", content);
         }
 
-        private static string Request(string url, string type, string content)
+        private string Request(string url, string type, string content)
         {
             var request = WebRequest.Create (url);
             request.Method = type;
             request.ContentLength = 0;
+            if(!String.IsNullOrEmpty(_username) && !String.IsNullOrEmpty(_password))
+                request.Credentials = new NetworkCredential(_username, _password);
 
             if(!String.IsNullOrEmpty(content))
             {
