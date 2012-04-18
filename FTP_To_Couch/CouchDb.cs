@@ -56,6 +56,15 @@ namespace FTP_To_Couch
             Request(_dbUrl + dbName + "/" + Guid.NewGuid(), "PUT", _serializer.Serialize(document));
         }
 
+        public void CreateMultipleBusCheckins(string dbName, List<BusCheckin> checkins)
+        {
+            List<BusCheckinDoc> docs = new List<BusCheckinDoc>();
+            foreach(var checkin in checkins)
+                docs.Add(new BusCheckinDoc(checkin));
+
+            Request(_dbUrl + dbName + "/_bulk_docs", "POST", _serializer.Serialize(new BusCheckinDocs(docs)));
+        }
+
         public bool BusCheckinExists(BusCheckin checkin)
         {
             var key = String.Format("[{0},{1},{2},{3},{4},{5},{6}]", checkin.BusId,
@@ -90,13 +99,13 @@ namespace FTP_To_Couch
         public void DoPullReplication(string remoteSource)
         {
             var content = "{\"source\":\"" + remoteSource + HRT_DB_NAME + "\",\"target\":\"" + HRT_DB_NAME + "\"}";
-            var response = Request(_dbUrl + "_replicate", "POST", content);
+            Request(_dbUrl + "_replicate", "POST", content);
         }
 
         public void DoPushReplication(string remoteTarget)
         {
             var content = "{\"source\":\"" + HRT_DB_NAME + "\",\"target\":\"" + remoteTarget + HRT_DB_NAME + "\"}";
-            var response = Request(_dbUrl + "_replicate", "POST", content);
+            Request(_dbUrl + "_replicate", "POST", content);
         }
 
         private string Request(string url, string type, string content)

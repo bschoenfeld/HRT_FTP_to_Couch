@@ -19,8 +19,7 @@ namespace FTP_To_Couch
         {
             Console.WriteLine ("Hello World!");
 
-            var couchUrl = ConfigurationManager.AppSettings.Get("CLOUDANT_URL");
-            var db = new CouchDb(couchUrl);
+            var db = new CouchDb("http://oilytheotter.iriscouch.com");
             //var db = new CouchDb("http://127.0.0.1:5984/");
 
             if(!db.DatabaseExists(CouchDb.HRT_DB_NAME))
@@ -28,36 +27,50 @@ namespace FTP_To_Couch
 
             while(true)
             {
-                //Stopwatch stopwatch = new Stopwatch();
-                //stopwatch.Start();
-
-                db.DoPullReplication("http://oilytheotter.iriscouch.com/");
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
 
                 string contents = GetFileFromServer (new Uri ("ftp://216.54.15.3/Anrd/hrtrtf.txt"));
                 List<BusCheckin> checkins = GetBusCheckinsFromFile (contents);
-    
+                List<BusCheckin> checkinsToDb = new List<BusCheckin>();
+
                 int processed = 0;
                 int added = 0;
                 int routes = 0;
-                foreach (var checkin in checkins)
+                for(int i=0; i<checkins.Count; i++)
                 {
+                    var checkin = checkins[i];
+
                     processed++;
                     if(!db.BusCheckinExists(checkin))
                     {
                         if(checkin.Route == -1)
+                        {
+                            for(int j=i-1; j>=0; j--)
+                            {
+                                if(checkins[j].BusId == checkin.BusId && checkins[j].Route != -1)
+                                {
+                                    checkin.Route = checkins[j].Route;
+                                    break;
+                                }
+                            }
+                        }
+                        if(checkin.Route == -1)
                             checkin.Route = db.GetRouteForBusId(checkin.BusId);
+
                         if(checkin.Route != -1)
                             routes++;
-                        db.CreateDocument(CouchDb.HRT_DB_NAME, checkin);
-                        added++;
+
+                        checkinsToDb.Add(checkin);
                     }
                 }
 
-                db.DoPushReplication("http://oilytheotter.iriscouch.com/");
+                db.CreateMultipleBusCheckins(CouchDb.HRT_DB_NAME, checkinsToDb);
+                added = checkinsToDb.Count;
+                
+                stopwatch.Stop();
     
-                //stopwatch.Stop();
-    
-                //Console.WriteLine(String.Format("Processed {0} checkins. {1} added. {2} have routes. {3} ms", processed, added, routes, stopwatch.ElapsedMilliseconds));
+                Console.WriteLine(String.Format("Processed {0} checkins. {1} added. {2} have routes. {3} ms", processed, added, routes, stopwatch.ElapsedMilliseconds));
 
                 System.Threading.Thread.Sleep(30000);
             }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace FTP_To_Couch
 {
@@ -33,7 +34,7 @@ namespace FTP_To_Couch
         public int StopId { get; set; }
         public string RawData { get; set; }
 
-        private BusCheckin ()
+        protected BusCheckin ()
         {
         }
 
@@ -95,5 +96,36 @@ namespace FTP_To_Couch
             return null;
         }
 
+    }
+
+    public class BusCheckinDoc : BusCheckin
+    {
+        public string _id {get; set;}
+        public BusCheckinDoc(BusCheckin c)
+        {
+            CheckinTime = c.CheckinTime;
+            BusId = c.BusId;
+            Location = c.Location;
+            LocationValid = c.LocationValid;
+            Adherence = c.Adherence;
+            AdherenceValid = c.AdherenceValid;
+            HasRoute = c.HasRoute;
+            RouteLookedUp = c.RouteLookedUp;
+            Route = c.Route;
+            Direction = c.Direction;
+            StopId = c.StopId;
+            RawData = c.RawData;
+            _id = Guid.NewGuid().ToString();
+        }
+    }
+
+    public class BusCheckinDocs
+    {
+        public BusCheckinDoc[] docs { get; set; }
+
+        public BusCheckinDocs(List<BusCheckinDoc> checkinDocs)
+        {
+            docs = checkinDocs.ToArray();
+        }
     }
 }
